@@ -1,0 +1,59 @@
+```import bpy
+
+group_pairs = [
+    ("Ab-R-Breast", "Ab-L-Breast"),
+    ("Ab-L-BrochiUp", "Ab-L-UpperArm-Tw1"),
+    ("Ab-R-BrochiUp", "Ab-R-UpperArm-Tw1"),
+    ("Ab-L-Deltoid", "Ab-L-Trape1"),
+    ("Ab-R-Deltoid", "Ab-R-Trape1"),
+]
+
+groups_to_delete_only = ["Ab-L-Venter", "Ab-R-Venter"]
+
+obj = bpy.context.object
+
+if obj is None or obj.type != 'MESH':
+    raise Exception("Active object must be a mesh.")
+
+bpy.ops.object.mode_set(mode='OBJECT')
+
+for source_name, target_name in group_pairs:
+    if source_name not in obj.vertex_groups:
+        print(f"Source group '{source_name}' not found.")
+        continue
+    if target_name not in obj.vertex_groups:
+        print(f"Target group '{target_name}' not found.")
+        continue
+
+    source_group = obj.vertex_groups[source_name]
+    target_group = obj.vertex_groups[target_name]
+
+    for v in obj.data.vertices:
+        source_weight = 0.0
+        for g in v.groups:
+            if g.group == source_group.index:
+                source_weight = g.weight
+                break
+
+        if source_weight > 0.0:
+            target_weight = 0.0
+            for g in v.groups:
+                if g.group == target_group.index:
+                    target_weight = g.weight
+                    break
+
+            new_weight = min(source_weight + target_weight, 1.0)
+            target_group.add([v.index], new_weight, 'REPLACE')
+
+    obj.vertex_groups.remove(source_group)
+
+for group_name in groups_to_delete_only:
+    group = obj.vertex_groups.get(group_name)
+    if group:
+        obj.vertex_groups.remove(group)
+        print(f"Deleted group: {group_name}")
+    else:
+        print(f"Group '{group_name}' not found, skipping.")
+
+print("Vertex group mixing and cleanup complete.")
+```
