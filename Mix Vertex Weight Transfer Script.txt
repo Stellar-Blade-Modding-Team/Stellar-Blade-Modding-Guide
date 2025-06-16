@@ -1,14 +1,12 @@
-```import bpy
+import bpy
 
 group_pairs = [
     ("Ab-R-Breast", "Ab-L-Breast"),
     ("Ab-L-BrochiUp", "Ab-L-UpperArm-Tw1"),
     ("Ab-R-BrochiUp", "Ab-R-UpperArm-Tw1"),
-    ("Ab-L-Deltoid", "Ab-L-Trape1"),
-    ("Ab-R-Deltoid", "Ab-R-Trape1"),
 ]
 
-groups_to_delete_only = ["Ab-L-Venter", "Ab-R-Venter"]
+groups_to_delete_only = ["Ab-L-Venter", "Ab-R-Venter", "Ab-L-Deltoid", "Ab-R-Deltoid"]
 
 obj = bpy.context.object
 
@@ -56,4 +54,3 @@ for group_name in groups_to_delete_only:
         print(f"Group '{group_name}' not found, skipping.")
 
 print("Vertex group mixing and cleanup complete.")
-```
