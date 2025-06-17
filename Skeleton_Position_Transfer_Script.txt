@@ -1,0 +1,27 @@
+import bpy
+
+if bpy.context.mode != 'EDIT_ARMATURE':
+    bpy.ops.object.mode_set(mode='EDIT')
+
+selected_armatures = [obj for obj in bpy.context.selected_objects if obj.type == 'ARMATURE']
+if len(selected_armatures) != 2:
+    raise Exception("Select exactly two armatures: one active (target), one other (source)")
+
+target_armature = bpy.context.active_object
+source_armature = [obj for obj in selected_armatures if obj != target_armature][0]
+
+bpy.context.view_layer.objects.active = target_armature
+bpy.ops.object.mode_set(mode='EDIT')
+target_edit_bones = target_armature.data.edit_bones
+source_edit_bones = source_armature.data.edit_bones
+
+matched_bones = set(target_edit_bones.keys()) & set(source_edit_bones.keys())
+
+for bone_name in matched_bones:
+    target_bone = target_edit_bones[bone_name]
+    source_bone = source_edit_bones[bone_name]
+    target_bone.head = source_bone.head.copy()
+    target_bone.tail = source_bone.tail.copy()
+    target_bone.roll = source_bone.roll
+
+print(f"Moved {len(matched_bones)} matching bones from '{source_armature.name}' to '{target_armature.name}'")
